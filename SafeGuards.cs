@@ -1,4 +1,6 @@
 using System.Data.SQLite;
+using System.Xml;
+using Microsoft.AspNetCore.Http;
 
 namespace CodeReviewCsharpTest;
 
@@ -31,5 +33,27 @@ public class SafeGuards
         // Guard: using statement for deterministic disposal - NOT resource leak
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
         return (int)stream.Length;
+    }
+
+    public void SafeCookie(IResponseCookies cookies, string token)
+    {
+        // Guard: Secure cookie with HttpOnly and Secure enabled
+        cookies.Append("session_token", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax
+        });
+    }
+
+    public void SafeXml(string xml)
+    {
+        // Guard: XmlReaderSettings with DtdProcessing.Prohibit - NOT XXE
+        var settings = new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Prohibit
+        };
+        using var reader = XmlReader.Create(new StringReader(xml), settings);
+        while (reader.Read()) { }
     }
 }
