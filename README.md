@@ -30,6 +30,10 @@ Benchmark test suite for automated code review engines on C# (.NET 8) backend ap
 | `AuthService.cs` | Hardcoded JWT Secret Key & Plaintext Credential Logging | Information Disclosure | CWE-798 / CWE-532 | High | **BLOCKING** |
 | `RedirectEndpoint.cs` | Open Redirect without host domain validation | Redirection | CWE-601 | Medium | **BLOCKING** |
 | `UserProfileEndpoint.cs` | IDOR on user account deletion without ownership check | Broken Access Control | CWE-639 | High | **BLOCKING** |
+| `CorsPolicyConfig.cs` | Wildcard \`AllowAnyOrigin()\` with \`AllowCredentials()\` | CORS Misconfiguration | CWE-942 | High | **BLOCKING** |
+| `XmlReaderService.cs` | XML parser without DTD expansion prohibition (XXE) | Injection / XXE | CWE-611 | High | **BLOCKING** |
+| `CookieHelper.cs` | Cookies explicitly configured with \`HttpOnly = false\` and \`Secure = false\` | Insecure Cookie | CWE-614 / CWE-1004 | Medium | **NON-BLOCKING** |
+| `LoginEndpoint.cs` | Authentication login route missing rate limiting or throttling | Missing Rate Limiting | CWE-307 | Medium | **NON-BLOCKING** |
 
 ### ⚡ Performance & Resource Leaks
 
@@ -44,7 +48,7 @@ Benchmark test suite for automated code review engines on C# (.NET 8) backend ap
 
 | File | Safe Pattern Implemented | Expected Reviewer Result |
 | :--- | :--- | :---: |
-| `SafeGuards.cs` | Parameterized SQLite command (`@user`), Whitelist URI validation, `using` automatic disposal | **0 False Positives** (Clean) |
+| `SafeGuards.cs` | Parameterized SQLite command (`@user`), Whitelist URI validation, `using` automatic disposal, safe XML reader (`DtdProcessing.Prohibit`), hardened `HttpOnly`/`Secure` cookies | **0 False Positives** (Clean) |
 
 ---
 
@@ -67,6 +71,6 @@ curl -X POST http://localhost:8081/api/v1/review/trigger \
 
 ## 📊 Benchmark Validation Results
 
-- **Detection Rate:** 10 / 10 (100%)
+- **Detection Rate:** 15 / 15 (100%)
 - **False Positive Rate:** 0 / 1 (`SafeGuards.cs` completely passed)
 - **False Negative Rate:** 0%
